@@ -20,17 +20,21 @@
   
   Normally the Sensor transmits it's temperature on the board first,
   a checksum at the end and the single temperature values of the matrix (4x4 or 1x8) between.
-  Because the maximum length the arduino will receive is 32 Bytes,
+  Because the maximum buffer length the arduino will receive is 32 Bytes,
   for the 4x4 matrix the last value and ckecksum will be lost.
   
+  You may raise the value if you want, by changing in
+   - Wire.h: #define BUFFER_LENGTH 32 -> 64
+   - twi.h:  #define TWI_BUFFER_LENGTH 32 -> 64
+
   @author: https://github.com/tofixx
   
 **/
 
 void setup()
 {
-  Wire.begin();        // join i2c bus (address optional for master)
-  Serial.begin(9600);  // start serial for output
+  Wire.begin();                     // join i2c bus (address optional for master)
+  Serial.begin(9600);               // start serial for output
 }
 
 void loop()
@@ -55,10 +59,18 @@ void loop()
       
       i+=2; // raise the bytes received counter
    }
+  
+  if(Wire.available())
+  {
+    int checksum = Wire.read();
+    i++;
+    Serial.print(" - ");
+    Serial.print(checksum,BIN);
+  }
    
   // as described above, the message will be incomplete!
   
-  Serial.print(" - received bytes: ");    
+  Serial.print(" - ByteCounter: ");    
   Serial.println(i);               
 
   delay(250);                      // remind, the sensor will update it's values only 4 times a second
